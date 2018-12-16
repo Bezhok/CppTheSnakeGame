@@ -3,23 +3,25 @@
 #include <fstream>
 #include <vector>
 #include <memory>
-//#include "Snake.h"
 
 namespace Bezhok {
 	using std::fstream;
 	using std::vector;
 	using std::shared_ptr;
 
-	class GameObject;
 	class Snake;
 	class Fruit;
+
+	typedef shared_ptr<Snake> snake_ref;
+	typedef shared_ptr<Fruit> fruit_ref;
 
 	struct Game_Data
 	{
 		sf::RenderWindow window;
-		//Snake snake;
-		//Fruit fruit;
+		snake_ref snake;
+		fruit_ref fruit;
 	};
+
 	typedef shared_ptr<Game_Data> game_data_ref;
 
 	class Game
@@ -44,9 +46,9 @@ namespace Bezhok {
 		int m_stats[10] = { 0 };
 		const char m_fname[10] = "stats.dat";
 		game_data_ref m_data;
-		sf::Event m_event;
+		bool m_pause = false;
 
-		/* handle input events */
-		void handle_input();
+		/* handle events */
+		void handle();
 	};
 }

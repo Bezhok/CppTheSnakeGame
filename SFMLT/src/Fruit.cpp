@@ -1,6 +1,8 @@
-#include "Fruit.h"
 #include <ctime>
 #include <algorithm>
+#include "Fruit.h"
+#include "Game.h"
+#include "Snake.h"
 
 namespace Bezhok {
 	Fruit::Fruit(game_data_ref data)
@@ -24,7 +26,7 @@ namespace Bezhok {
 		m_y = rand() % Game::BLOCKS_COUNT_Y;
 	}
 
-	void Fruit::spawn(Snake& snake)
+	void Fruit::spawn()
 	{
 		srand(static_cast<unsigned int>(time(0)));
 
@@ -36,8 +38,8 @@ namespace Bezhok {
 			m_y = rand() % Game::BLOCKS_COUNT_Y;
 
 			// respawn if it has spawned on the snake
-			for (int i = 0; i < snake.len(); ++i) {
-				if (snake[i].y == m_y && snake[i].x == m_x) {
+			for (int i = 0; i < m_data->snake->len(); ++i) {
+				if (m_data->snake->operator[](i).y == m_y && m_data->snake->operator[](i).x == m_x) {
 					is_free_space = false;
 					break;
 				}

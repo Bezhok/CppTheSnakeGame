@@ -3,6 +3,8 @@
 #include "Game.h"
 
 namespace Bezhok {
+	class Game;
+
 	class GameObject
 	{
 	public:
@@ -15,7 +17,7 @@ namespace Bezhok {
 
 		virtual void draw() = 0;
 		virtual void init() = 0;
-		//virtual bool update() = 0;
+		virtual bool update() = 0;
 	protected:
 		sf::Texture m_texture;
 		sf::Sprite m_sprite;

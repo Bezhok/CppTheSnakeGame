@@ -10,11 +10,13 @@
 namespace Bezhok {
 	using std::vector;
 	using std::ios_base;
-	using std::shared_ptr;
+	using std::make_shared;
 
 	Game::Game()
 	{
-		m_data = std::make_shared<Game_Data>();
+		m_data = make_shared<Game_Data>();
+		m_data->snake = make_shared<Snake>(m_data);
+		m_data->fruit = make_shared<Fruit>(m_data);
 
 		m_data->window.create(sf::VideoMode(WIDTH, HEIGTH), "Snake");
 	
@@ -39,86 +41,91 @@ namespace Bezhok {
 		}
 	}
 
-	void Game::handle_input()
+	void Game::handle()
 	{
-		
-	}
-
-	void Game::run()
-	{
-		Snake m_snake(m_data);
-		Fruit apple_o(m_data);
-
-		bool is_pause = false;
-		while (m_data->window.isOpen())
+		sf::Event e;
+		while (m_data->window.pollEvent(e))
 		{
+			GameObject::direction dir = m_data->snake->get_direction();
 
-			while (m_data->window.pollEvent(m_event))
+			switch (e.type)
 			{
-				switch (m_event.type)
+				// closed window
+			case sf::Event::Closed:
+				m_data->window.close();
+				break;
+
+				// pressed key
+			case sf::Event::KeyPressed:
+				switch (e.key.code)
 				{
-					// closed window
-				case sf::Event::Closed:
-					m_data->window.close();
+				case sf::Keyboard::A:
+				case sf::Keyboard::Left:
+					//can not move forward or back
+					if (dir == GameObject::direction::top || dir == GameObject::direction::bottom)
+						m_data->snake->set_direction(GameObject::direction::left);
 					break;
 
-					// pressed key
-				case sf::Event::KeyPressed:
-					switch (m_event.key.code)
-					{
-					case sf::Keyboard::Left:
-						m_snake.set_direction(m_snake.direction::left);
-						break;
-
-					case sf::Keyboard::Right:
-						m_snake.set_direction(m_snake.direction::right);
-						break;
-
-					case sf::Keyboard::Down:
-						m_snake.set_direction(m_snake.direction::bottom);
-						break;
-
-					case sf::Keyboard::Up:
-						m_snake.set_direction(m_snake.direction::top);
-						break;
-
-					case sf::Keyboard::Space:
-						m_event.key.code = sf::Keyboard::Unknown;
-						is_pause = is_pause ? false : true;
-						break;
-					default:
-						break;
-					}
-
+				case sf::Keyboard::D:
+				case sf::Keyboard::Right:
+					if (dir == GameObject::direction::top || dir == GameObject::direction::bottom)
+						m_data->snake->set_direction(GameObject::direction::right);
 					break;
 
+				case sf::Keyboard::S:
+				case sf::Keyboard::Down:
+					if (dir == GameObject::direction::left || dir == GameObject::direction::right)
+						m_data->snake->set_direction(GameObject::direction::bottom);
+					break;
+
+				case sf::Keyboard::W:
+				case sf::Keyboard::Up:
+					if (dir == GameObject::direction::left || dir == GameObject::direction::right)
+						m_data->snake->set_direction(GameObject::direction::top);
+					break;
+
+				case sf::Keyboard::Space:
+					e.key.code = sf::Keyboard::Unknown;
+					m_pause = m_pause ? false : true;
+					break;
 				default:
 					break;
 				}
 
-			}
+				break;
 
-			if (!is_pause) {
+			default:
+				break;
+			}
+		}
+	}
+
+	void Game::run()
+	{
+		while (m_data->window.isOpen())
+		{
+			handle();
+
+			if (!m_pause) {
 				// delay todo
 				Sleep(100);
 
 				// logic starts
-				bool is_life = m_snake.update(apple_o);
-							//m_apple.update();
+				bool life = m_data->snake->update();
 
 				// new frame start
 				m_data->window.clear(sf::Color::White);
-				m_snake.draw();
-				apple_o.draw();
+				m_data->snake->draw();
+				m_data->fruit->draw();
 				m_data->window.display();
 
-				if (!is_life) {
+				if (!life) {
 					// shift array
 					for (int i = 0; i < sizeof(m_stats) / sizeof(int);++i) {
-						if (m_snake.m_points > m_stats[i]) {
+						if (m_data->snake->m_points > m_stats[i]) {
 							int temp = m_stats[i];
 
-							m_stats[i] = m_snake.m_points;
+							m_stats[i] = m_data->snake->m_points;
 
 							int prev = temp;
 							int curr;
@@ -131,16 +138,16 @@ namespace Bezhok {
 						}
 					}
 					//
-					m_snake.init();
-					apple_o.init();
+					m_data->snake->init();
+					m_data->fruit->init();
 
 					// todo stop, output stats
 					for (int& x : m_stats) {
 						std::cout << x << std::endl;
 					}
 					std::cout << "\n\n";
-					is_pause = true;
 
+					m_pause = true;
 				}
 			}
 		}

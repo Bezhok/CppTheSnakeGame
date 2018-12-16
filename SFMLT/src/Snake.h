@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
 #include "GameObject.h"
-#include "Game.h"
-#include "Fruit.h"
 
 namespace Bezhok {
 	class Game;
@@ -24,6 +22,9 @@ namespace Bezhok {
 		/* set direction */
 		void set_direction(direction dir);
 
+		/* get direction */
+		direction get_direction();
+
 		/* get len */
 		int len();
 
@@ -34,7 +35,7 @@ namespace Bezhok {
 		virtual void draw() override;
 
 		/* move, check is died, try to eat fruit */
-		bool update(Fruit& fruit);
+		virtual bool update() override;
 
 		/* add neew item to snake */
 		Snake& operator++();

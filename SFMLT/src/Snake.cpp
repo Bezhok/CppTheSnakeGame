@@ -1,4 +1,6 @@
 #include "Snake.h"
+#include "Game.h"
+#include "Fruit.h"
 
 namespace Bezhok {
 	Snake::Snake(game_data_ref data)
@@ -28,7 +30,7 @@ namespace Bezhok {
 		}
 	}
 
-	bool Snake::update(Fruit& fruit)
+	bool Snake::update()
 	{
 		move();
 
@@ -40,10 +42,10 @@ namespace Bezhok {
 		}
 
 		// if snake head on apple
-		if (m_items[0].y == fruit.m_y && m_items[0].x == fruit.m_x) {
-			fruit.spawn(*this);
+		if (m_items[0].y == m_data->fruit->m_y && m_items[0].x == m_data->fruit->m_x) {
+			m_data->fruit->spawn();
 			++(*this);
-			m_points += fruit.get_points();
+			m_points += m_data->fruit->get_points();
 		}
 
 		return true;
@@ -87,6 +89,11 @@ namespace Bezhok {
 	void Snake::set_direction(direction dir)
 	{
 		m_cur_direction = dir;
+	}
+
+	Snake::direction Snake::get_direction()
+	{
+		return m_cur_direction;
 	}
 
 	int Snake::len()

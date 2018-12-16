@@ -1,8 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "GameObject.h"
-#include "Game.h"
-#include "Snake.h"
 
 namespace Bezhok {
 	class Game;
@@ -23,10 +21,10 @@ namespace Bezhok {
 		virtual void init() override;
 
 		/* todo */
-		bool update();
+		virtual bool update() override { return true; };
 
 		/* try to spawn not on another object */
-		void spawn(Snake& snake);
+		void spawn();
 
 		/* draw */
 		virtual void draw() override;
