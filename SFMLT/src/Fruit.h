@@ -18,13 +18,10 @@ namespace Bezhok {
 		int get_points();
 
 		/* set standart fruit */
-		virtual void init() override;
+		virtual void reset() override;
 
 		/* todo */
 		virtual bool update() override { return true; };
-
-		/* try to spawn not on another object */
-		void spawn();
 
 		/* draw */
 		virtual void draw() override;

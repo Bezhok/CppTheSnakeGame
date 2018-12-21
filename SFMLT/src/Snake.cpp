@@ -1,6 +1,7 @@
 #include "Snake.h"
 #include "Game.h"
 #include "Fruit.h"
+#include "Wall.h"
 
 namespace Bezhok {
 	Snake::Snake(game_data_ref data)
@@ -9,10 +10,10 @@ namespace Bezhok {
 		m_texture.loadFromFile("images/green.png");
 		m_sprite.setTexture(m_texture);
 
-		init();
+		reset();
 	}
 
-	void Snake::init()
+	void Snake::reset()
 	{
 		// clear snake
 		m_points = 0;
@@ -41,9 +42,16 @@ namespace Bezhok {
 			}
 		}
 
+		// if head on block
+		for (int i = 0; i < m_data->wall->m_coordinates.size(); ++i) {
+			if (m_data->wall->m_coordinates[i].y == m_items[0].y && m_data->wall->m_coordinates[i].x == m_items[0].x) {
+				return false;
+			}
+		}
+
 		// if snake head on apple
 		if (m_items[0].y == m_data->fruit->m_y && m_items[0].x == m_data->fruit->m_x) {
-			m_data->fruit->spawn();
+			m_data->fruit->reset();
 			++(*this);
 			m_points += m_data->fruit->get_points();
 		}

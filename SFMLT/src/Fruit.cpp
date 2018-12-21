@@ -3,6 +3,7 @@
 #include "Fruit.h"
 #include "Game.h"
 #include "Snake.h"
+#include "Wall.h"
 
 namespace Bezhok {
 	Fruit::Fruit(game_data_ref data)
@@ -11,7 +12,7 @@ namespace Bezhok {
 		m_texture.loadFromFile("images/red.png");
 		m_sprite.setTexture(m_texture);
 
-		init();
+		reset();
 	}
 
 	int Fruit::get_points()
@@ -19,14 +20,7 @@ namespace Bezhok {
 		return m_points;
 	}
 
-	void Fruit::init()
-	{
-		srand(static_cast<unsigned int>(time(0)));
-		m_x = rand() % Game::BLOCKS_COUNT_X;
-		m_y = rand() % Game::BLOCKS_COUNT_Y;
-	}
-
-	void Fruit::spawn()
+	void Fruit::reset()
 	{
 		srand(static_cast<unsigned int>(time(0)));
 
@@ -44,6 +38,13 @@ namespace Bezhok {
 					break;
 				}
 			}
+			for (int i = 0; i < m_data->wall->m_coordinates.size(); ++i) {
+				if (m_data->wall->m_coordinates[i].y == m_y && m_data->wall->m_coordinates[i].x == m_x) {
+					is_free_space = false;
+					break;
+				}
+			}
+
 		} while (!is_free_space);
 	}
 

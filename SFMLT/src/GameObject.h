@@ -16,8 +16,8 @@ namespace Bezhok {
 		GameObject(game_data_ref m_data);
 
 		virtual void draw() = 0;
-		virtual void init() = 0;
 		virtual bool update() = 0;
+		virtual void reset() = 0;
 	protected:
 		sf::Texture m_texture;
 		sf::Sprite m_sprite;

@@ -29,7 +29,7 @@ namespace Bezhok {
 		int len();
 
 		/* set standart snake */
-		virtual void init() override;
+		virtual void reset() override;
 
 		/* draw */
 		virtual void draw() override;
