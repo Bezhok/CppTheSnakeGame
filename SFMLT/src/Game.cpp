@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <windows.h>
-#include <iostream> // test
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -8,6 +7,7 @@
 #include "Snake.h"
 #include "Fruit.h"
 #include "Wall.h"
+#include "GameMenu.h"
 
 namespace Bezhok {
 	using std::vector;
@@ -26,10 +26,12 @@ namespace Bezhok {
 		m_data->snake = make_shared<Snake>(m_data);
 		m_data->fruit = make_shared<Fruit>(m_data);
 
+		m_data->stats = m_stats;
 		//m_data->objects.push_back(make_shared<Wall>());
 
 		m_data->window.create(sf::VideoMode(WIDTH, HEIGTH), "Snake");
-	
+		m_menu = make_shared<GameMenu>(m_data);
+
 		fstream stats_file;
 		stats_file.open(m_fname, ios_base::binary | ios_base::in);
 		if (stats_file.is_open()) {
@@ -57,17 +59,23 @@ namespace Bezhok {
 		while (m_data->window.pollEvent(e))
 		{
 			GameObject::direction dir = m_data->snake->get_direction();
-
+			int num;
 			switch (e.type)
 			{
-				// closed window
+			// closed window
 			case sf::Event::Closed:
 				m_data->window.close();
 				break;
 
-				// pressed key
+			case sf::Event::MouseButtonPressed:
+				num = m_menu->choosen_level();
+				if (num >= 0) m_level_id = num + 1;
+				m_menu->handle_input();
+				break;
+
+			// pressed key
 			case sf::Event::KeyPressed:
-				switch (e.key.code)
+				switch (e.key.code) //TODO перенести в змею 
 				{
 				case sf::Keyboard::A:
 				case sf::Keyboard::Left:
@@ -96,7 +104,7 @@ namespace Bezhok {
 
 				case sf::Keyboard::Space:
 					e.key.code = sf::Keyboard::Unknown;
-					m_pause = m_pause ? false : true;
+					m_data->pause = m_data->pause ? false : true;
 					break;
 				default:
 					break;
@@ -129,7 +137,7 @@ namespace Bezhok {
 				break;
 			}
 		}
-		//
+
 	}
 
 	void Game::init_map(const string& fname)
@@ -160,9 +168,12 @@ namespace Bezhok {
 
 	void Game::run()
 	{
-		string name = "levels/level2.txt"; // for example
+		m_level_id = 1;
+		int prev_level_id = m_level_id;
+
+		string name = "levels/level1.txt"; // for example
 		init_map(name);
-		m_pause = true;
+		m_data->pause = true;
 
 		while (m_data->window.isOpen())
 		{
@@ -173,7 +184,7 @@ namespace Bezhok {
 
 			// logic starts
 			bool life = true;
-			if (!m_pause) {
+			if (!m_data->pause) {
 				life = m_data->snake->update();
 			}
 
@@ -183,24 +194,30 @@ namespace Bezhok {
 			m_data->fruit->draw();
 			m_data->wall->draw();
 
-			if (m_pause) {
-			// menu
+			if (m_data->pause) {
+				
+				m_menu->draw();
+
+				// if chosed new level
+				if (prev_level_id != m_level_id) {
+					string name;
+					name = "levels/level";
+					name += to_string(m_level_id);
+					name += ".txt";
+					init_map(name);
+					life = false;
+				}
+				prev_level_id = m_level_id;
 			}
-			m_data->window.display();
-			
+
 			if (!life) {
 				add2stats(m_data->snake->m_points);
 				m_data->snake->reset();
 				m_data->fruit->reset();
 
-				// output stats
-				for (int& x : m_stats) {
-					std::cout << x << std::endl;
-				}
-				std::cout << "\n\n";
-
-				m_pause = true;
-			}
+				m_data->pause = true;
+			}			
+			m_data->window.display();
 		}
 	}
 }

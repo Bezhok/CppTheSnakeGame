@@ -19,6 +19,9 @@
     <Filter Include="Файлы заголовков\Core">
       <UniqueIdentifier>{6c192045-e41e-4742-9798-2a1cadf9d0cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="levels">
+      <UniqueIdentifier>{f89fe6bf-5b50-49ce-945c-517230ef9820}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -34,7 +37,13 @@
       <Filter>Исходные файлы\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Fruit.cpp">
-      <Filter>Исходные файлы\Core</Filter>
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Wall.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameMenu.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,5 +59,28 @@
     <ClInclude Include="src\Game.h">
       <Filter>Файлы заголовков\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Wall.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameMenu.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="levels\level1.txt">
+      <Filter>levels</Filter>
+    </Text>
+    <Text Include="levels\level2.txt">
+      <Filter>levels</Filter>
+    </Text>
+    <Text Include="levels\level3.txt">
+      <Filter>levels</Filter>
+    </Text>
+    <Text Include="levels\level4.txt">
+      <Filter>levels</Filter>
+    </Text>
+    <Text Include="levels\level5.txt">
+      <Filter>levels</Filter>
+    </Text>
   </ItemGroup>
 </Project>

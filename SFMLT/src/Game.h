@@ -14,10 +14,12 @@ namespace Bezhok {
 	class Fruit;
 	class GameObject;
 	class Wall;
+	class GameMenu;
 
 	typedef shared_ptr<Snake> snake_ref;
 	typedef shared_ptr<Fruit> fruit_ref;
 	typedef shared_ptr<Wall> wall_ref;
+	typedef shared_ptr<GameMenu> menu_ref;
 
 	typedef shared_ptr<GameObject> game_object_ref;
 
@@ -27,6 +29,8 @@ namespace Bezhok {
 		snake_ref snake;
 		fruit_ref fruit;
 		wall_ref wall;
+		int* stats;
+		bool pause = false;
 		//vector<game_object_ref> objects;
 	};
 
@@ -40,7 +44,7 @@ namespace Bezhok {
 		static const int BLOCKS_COUNT_Y = 20;
 		static const int WIDTH = BLOCK_SIZE * BLOCKS_COUNT_X;
 		static const int HEIGTH = BLOCK_SIZE * BLOCKS_COUNT_Y;
-
+		static const int STATS_COUNT = 10;
 		/* read stats, create m_data */
 		Game();
 
@@ -49,13 +53,12 @@ namespace Bezhok {
 
 		/* game cycle */
 		void run();
-
 	private:
-		int m_stats[10] = { 0 };
+		int m_stats[STATS_COUNT] = { 0 };
 		const char m_fname[10] = "stats.dat";
 		game_data_ref m_data;
-		bool m_pause = false;
-
+		int m_level_id;
+		menu_ref m_menu;
 		/* handle events */
 		void handle();
 
