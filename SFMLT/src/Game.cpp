@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include <windows.h>
+#include <SFML/Window.hpp>
+#include <chrono>// sleep
+#include <thread>// sleep
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -26,27 +28,29 @@ namespace Bezhok {
 		m_data->snake = make_shared<Snake>(m_data);
 		m_data->fruit = make_shared<Fruit>(m_data);
 
-		m_data->stats = m_stats;
-		//m_data->objects.push_back(make_shared<Wall>());
+		m_data->records = m_records;
+		m_data->window.create(sf::VideoMode(WIDTH, HEIGTH), "Snake", sf::Style::Titlebar | sf::Style::Close);
+		sf::Image icon;
+		icon.loadFromFile("images/snake-icon.png");
+		m_data->window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
-		m_data->window.create(sf::VideoMode(WIDTH, HEIGTH), "Snake");
 		m_menu = make_shared<GameMenu>(m_data);
 
-		fstream stats_file;
-		stats_file.open(m_fname, ios_base::binary | ios_base::in);
-		if (stats_file.is_open()) {
-			stats_file.read((char*)m_stats, sizeof(m_stats));
-			stats_file.close();
+		fstream records_file;
+		records_file.open(m_fname, ios_base::binary | ios_base::in);
+		if (records_file.is_open()) {
+			records_file.read((char*)m_records, sizeof(m_records));
+			records_file.close();
 		}
 	}
 
 	Game::~Game()
 	{
-		fstream stats_file;
-		stats_file.open(m_fname, ios_base::binary | ios_base::out | ios_base::trunc);
-		if (stats_file.is_open()) {
-			stats_file.write((char*)m_stats, sizeof(m_stats));
-			stats_file.close();
+		fstream records_file;
+		records_file.open(m_fname, ios_base::binary | ios_base::out | ios_base::trunc);
+		if (records_file.is_open()) {
+			records_file.write((char*)m_records, sizeof(m_records));
+			records_file.close();
 		}
 		else {
 			//error
@@ -67,41 +71,19 @@ namespace Bezhok {
 				m_data->window.close();
 				break;
 
+			// mouse
+			case sf::Event::TouchEnded:
 			case sf::Event::MouseButtonPressed:
 				num = m_menu->choosen_level();
 				if (num >= 0) m_level_id = num + 1;
-				m_menu->handle_input();
+				m_menu->handle_input(e.key.code);
 				break;
 
 			// pressed key
 			case sf::Event::KeyPressed:
-				switch (e.key.code) //TODO перенести в змею 
+				m_data->snake->handle_input(e.key.code);
+				switch (e.key.code)
 				{
-				case sf::Keyboard::A:
-				case sf::Keyboard::Left:
-					//can not move forward or back
-					if (dir == GameObject::direction::top || dir == GameObject::direction::bottom)
-						m_data->snake->set_direction(GameObject::direction::left);
-					break;
-
-				case sf::Keyboard::D:
-				case sf::Keyboard::Right:
-					if (dir == GameObject::direction::top || dir == GameObject::direction::bottom)
-						m_data->snake->set_direction(GameObject::direction::right);
-					break;
-
-				case sf::Keyboard::S:
-				case sf::Keyboard::Down:
-					if (dir == GameObject::direction::left || dir == GameObject::direction::right)
-						m_data->snake->set_direction(GameObject::direction::bottom);
-					break;
-
-				case sf::Keyboard::W:
-				case sf::Keyboard::Up:
-					if (dir == GameObject::direction::left || dir == GameObject::direction::right)
-						m_data->snake->set_direction(GameObject::direction::top);
-					break;
-
 				case sf::Keyboard::Space:
 					e.key.code = sf::Keyboard::Unknown;
 					m_data->pause = m_data->pause ? false : true;
@@ -109,7 +91,6 @@ namespace Bezhok {
 				default:
 					break;
 				}
-
 				break;
 
 			default:
@@ -118,26 +99,25 @@ namespace Bezhok {
 		}
 	}
 
-	void Game::add2stats(int points)
+	void Game::add2records(int points)
 	{
 		// shift array
-		for (int i = 0; i < sizeof(m_stats) / sizeof(int); ++i) {
-			if (points > m_stats[i]) {
-				int temp = m_stats[i];
+		for (int i = 0; i < sizeof(m_records) / sizeof(int); ++i) {
+			if (points > m_records[i]) {
+				int temp = m_records[i];
 
-				m_stats[i] = m_data->snake->m_points;
+				m_records[i] = m_data->snake->m_points;
 
 				int prev = temp;
 				int curr;
-				for (int j = i + 1; j < sizeof(m_stats) / sizeof(int); ++j) {
-					curr = m_stats[j];
-					m_stats[j] = prev;
+				for (int j = i + 1; j < sizeof(m_records) / sizeof(int); ++j) {
+					curr = m_records[j];
+					m_records[j] = prev;
 					prev = curr;
 				}
 				break;
 			}
 		}
-
 	}
 
 	void Game::init_map(const string& fname)
@@ -149,7 +129,7 @@ namespace Bezhok {
 		if (file.is_open()) {
 			string line;
 			for (int y = 0; y < Game::BLOCKS_COUNT_Y && getline(file, line); ++y) {
-				for (int i = 0, x = 0; x < Game::BLOCKS_COUNT_X && i < line.size(); ++x, ++i) {
+				for (int i = 0, x = 0; x < Game::BLOCKS_COUNT_X && i < (int)line.size(); ++x, ++i) {
 					if (line[i] == '0') {
 						temp.push_back(Wall::block{ x,y });
 					}
@@ -159,11 +139,11 @@ namespace Bezhok {
 				}
 			}
 			file.close();
+			m_data->wall->init(temp);
 		}
 		else {
 			//error
 		}
-		m_data->wall->init(temp);
 	}
 
 	void Game::run()
@@ -173,6 +153,7 @@ namespace Bezhok {
 
 		string name = "levels/level1.txt"; // for example
 		init_map(name);
+		m_data->fruit->reset();
 		m_data->pause = true;
 
 		while (m_data->window.isOpen())
@@ -180,7 +161,7 @@ namespace Bezhok {
 			handle();
 
 			// delay todo
-			Sleep(100);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 			// logic starts
 			bool life = true;
@@ -211,12 +192,13 @@ namespace Bezhok {
 			}
 
 			if (!life) {
-				add2stats(m_data->snake->m_points);
+				add2records(m_data->snake->m_points);
 				m_data->snake->reset();
 				m_data->fruit->reset();
 
 				m_data->pause = true;
-			}			
+			}
+
 			m_data->window.display();
 		}
 	}

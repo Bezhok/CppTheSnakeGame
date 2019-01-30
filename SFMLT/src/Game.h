@@ -1,13 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <fstream>
-#include <vector>
 #include <memory>
 #include <string>
 
 namespace Bezhok {
 	using std::fstream;
-	using std::vector;
 	using std::shared_ptr;
 
 	class Snake;
@@ -29,9 +27,8 @@ namespace Bezhok {
 		snake_ref snake;
 		fruit_ref fruit;
 		wall_ref wall;
-		int* stats;
+		int* records;
 		bool pause = false;
-		//vector<game_object_ref> objects;
 	};
 
 	typedef shared_ptr<Game_Data> game_data_ref;
@@ -39,31 +36,32 @@ namespace Bezhok {
 	class Game
 	{
 	public:
-		static const int BLOCK_SIZE = 16;
+		static const int BLOCK_SIZE = 20;
 		static const int BLOCKS_COUNT_X = 30;
 		static const int BLOCKS_COUNT_Y = 20;
 		static const int WIDTH = BLOCK_SIZE * BLOCKS_COUNT_X;
 		static const int HEIGTH = BLOCK_SIZE * BLOCKS_COUNT_Y;
-		static const int STATS_COUNT = 10;
-		/* read stats, create m_data */
+		static const int RECORDS_COUNT = 10;
+		/* read records, create m_data */
 		Game();
 
-		/* write stats */
+		/* write records */
 		~Game();
 
 		/* game cycle */
 		void run();
 	private:
-		int m_stats[STATS_COUNT] = { 0 };
-		const char m_fname[10] = "stats.dat";
+		int m_records[RECORDS_COUNT] = { 0 };
+		const char m_fname[12] = "records.dat";
 		game_data_ref m_data;
 		int m_level_id;
 		menu_ref m_menu;
+
 		/* handle events */
 		void handle();
 
-		/* shift stats array */
-		void add2stats(int points);
+		/* shift records array */
+		void add2records(int points);
 
 		/* display new map */
 		void init_map(const std::string& fname);

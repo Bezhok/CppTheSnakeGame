@@ -8,6 +8,8 @@ namespace Bezhok {
 	{
 		m_texture.loadFromFile("images/white.png");
 		m_sprite.setTexture(m_texture);
+		auto size = m_sprite.getTexture()->getSize();
+		m_sprite.setScale(float(Game::BLOCK_SIZE) / size.x, float(Game::BLOCK_SIZE) / size.y);
 	}
 
 	Wall::~Wall()
@@ -16,25 +18,18 @@ namespace Bezhok {
 
 	void Wall::reset()
 	{
-		//srand(static_cast<unsigned int>(time(0)));
-
-		//m_coordinates.clear();
-		//for (int i = 0; i < 5; ++i) {
-		//	int x = rand() % Game::BLOCKS_COUNT_X;
-		//	int y = rand() % Game::BLOCKS_COUNT_Y;
-		//	m_coordinates.push_back(block{x, y});
-		//}
+		m_blocks.clear();
 	}
 
 	void Wall::init(vector<block>& coordinates)
 	{
-		m_coordinates = coordinates;
+		m_blocks = coordinates;
 	}
 
 	void Wall::draw()
 	{
-		for (int i = 0; i < m_coordinates.size(); ++i) {
-			m_sprite.setPosition(Game::BLOCK_SIZE *m_coordinates[i].x, Game::BLOCK_SIZE * m_coordinates[i].y);
+		for (int i = 0; i < m_blocks.size(); ++i) {
+			m_sprite.setPosition(Game::BLOCK_SIZE *m_blocks[i].x, Game::BLOCK_SIZE * m_blocks[i].y);
 			m_data->window.draw(m_sprite);
 		}
 	}

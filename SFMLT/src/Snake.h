@@ -43,6 +43,7 @@ namespace Bezhok {
 		/* get item */
 		snake_block& operator[](int i);
 
+		void handle_input(sf::Keyboard::Key key);
 		int m_points;
 	private:
 		const int START_X = Game::BLOCKS_COUNT_X / 2;

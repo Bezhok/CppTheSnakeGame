@@ -3,7 +3,7 @@
 #include "Wall.h"
 #include <istream>
 #include <string>
-#include <iostream>//test
+
 namespace Bezhok {
 	using std::ifstream;
 	using std::string;
@@ -19,7 +19,7 @@ namespace Bezhok {
 			sf::RectangleShape level_box;
 			level_box.setSize(sf::Vector2f(30, 30));
 			level_box.setFillColor(sf::Color(0, 0, 0));
-			level_box.setPosition(i*Game::BLOCK_SIZE * 3 + 5, Game::BLOCK_SIZE * 3 + 5);
+			level_box.setPosition(float(i*Game::BLOCK_SIZE * 3 + 5), float(Game::BLOCK_SIZE * 3 + 5));
 			m_levels.push_back(level_box);
 		}
 
@@ -47,7 +47,7 @@ namespace Bezhok {
 		text.setFont(font);
 
 		if (m_state == MenuState::main) {
-			text.setString("Levels You can choose any");
+			text.setString("Press space to start");
 			text.setCharacterSize(24);
 			text.setFillColor(sf::Color::Black);
 			m_data->window.draw(text);
@@ -77,46 +77,46 @@ namespace Bezhok {
 
 			m_data->window.draw(m_play_b);
 
-			// stats button
-			m_stats_b.setSize(sf::Vector2f(120, 40));
-			m_stats_b.setFillColor(sf::Color(0, 0, 0));
-			m_stats_b.setPosition(5, Game::HEIGTH - m_stats_b.getSize().y - 5);
-			m_data->window.draw(m_stats_b);
+			// records button
+			m_records_b.setSize(sf::Vector2f(120, 40));
+			m_records_b.setFillColor(sf::Color(0, 0, 0));
+			m_records_b.setPosition(5, Game::HEIGTH - m_records_b.getSize().y - 5);
+			m_data->window.draw(m_records_b);
 
 			text.setString("Records");
 			text.setCharacterSize(24);
 			text.setFillColor(sf::Color::White);
 			text.setPosition(
-				m_stats_b.getPosition() +
-				sf::Vector2f(m_stats_b.getSize().x / 8, m_stats_b.getSize().y / 16)
+				m_records_b.getPosition() +
+				sf::Vector2f(m_records_b.getSize().x / 8, m_records_b.getSize().y / 16)
 			);
 			m_data->window.draw(text);
 
 		}
 		else if (m_state == MenuState::statistics) {
 
-			// stats button
-			m_stats_b.setSize(sf::Vector2f(120, 40));
-			m_stats_b.setFillColor(sf::Color(0, 0, 0));
-			m_stats_b.setPosition(5, Game::HEIGTH - m_stats_b.getSize().y - 5);
-			m_data->window.draw(m_stats_b);
+			// records button
+			m_records_b.setSize(sf::Vector2f(120, 40));
+			m_records_b.setFillColor(sf::Color(0, 0, 0));
+			m_records_b.setPosition(5, Game::HEIGTH - m_records_b.getSize().y - 5);
+			m_data->window.draw(m_records_b);
 
 			text.setString("Back");
 			text.setCharacterSize(24);
 			text.setFillColor(sf::Color::White);
 			text.setPosition(
-				m_stats_b.getPosition() +
-				sf::Vector2f(m_stats_b.getSize().x / 4, m_stats_b.getSize().y / 16)
+				m_records_b.getPosition() +
+				sf::Vector2f(m_records_b.getSize().x / 4, m_records_b.getSize().y / 16)
 			);
 			m_data->window.draw(text);
 
-			// output stats
-			for (int i = 0; i < Game::STATS_COUNT; ++i) {
+			// output records
+			for (int i = 0; i < Game::RECORDS_COUNT; ++i) {
 				sf::Text text;
 				sf::Font font;
 				font.loadFromFile("arial.ttf");
 				text.setFont(font);
-				text.setString(to_string(m_data->stats[i]).c_str());
+				text.setString(to_string(m_data->records[i]).c_str());
 				text.setCharacterSize(24);
 				text.setFillColor(sf::Color::Black);
 				text.setPosition(Game::WIDTH/2 - Game::BLOCK_SIZE, i*Game::BLOCK_SIZE * 2);
@@ -126,27 +126,16 @@ namespace Bezhok {
 		}
 	}
 
-	void GameMenu::handle_input()
+	void GameMenu::handle_input(sf::Keyboard::Key key)
 	{
 		// switch to statistics
-		if (m_stats_b.getGlobalBounds().contains(
-			sf::Mouse::getPosition(m_data->window).x,
-			sf::Mouse::getPosition(m_data->window).y) &&
-			m_state == MenuState::main
-			) {
+		if (is_on_rect(m_records_b) && m_state == MenuState::main) {
 			m_state = MenuState::statistics;
 		}
-		else if (m_stats_b.getGlobalBounds().contains(
-			sf::Mouse::getPosition(m_data->window).x,
-			sf::Mouse::getPosition(m_data->window).y) &&
-			m_state == MenuState::statistics
-			) {
+		else if (is_on_rect(m_records_b) && m_state == MenuState::statistics) {
 			m_state = MenuState::main;
 		}
-		else if (m_play_b.getGlobalBounds().contains(
-			sf::Mouse::getPosition(m_data->window).x,
-			sf::Mouse::getPosition(m_data->window).y)
-		) {
+		else if (is_on_sprite(m_play_b)) {
 			m_data->pause = false;
 		}
 	}
@@ -154,15 +143,44 @@ namespace Bezhok {
 	int GameMenu::choosen_level()
 	{
 		for (int i = 0; i < m_levels.size(); ++i) {
-			if (m_levels[i].getGlobalBounds().contains(
-				sf::Mouse::getPosition(m_data->window).x,
-				sf::Mouse::getPosition(m_data->window).y)
-				) {
+			if (is_on_rect(m_levels[i])) {
 				return i;
 			}
 		}
 
 		// if not clicking
 		return -1;
+	}
+
+	bool GameMenu::is_on_sprite(sf::Sprite obj)
+	{
+		if ((obj.getGlobalBounds().contains(
+			sf::Touch::getPosition(0, m_data->window).x,
+			sf::Touch::getPosition(0, m_data->window).y) ||
+
+			obj.getGlobalBounds().contains(
+				sf::Mouse::getPosition(m_data->window).x,
+				sf::Mouse::getPosition(m_data->window).y))
+			) {
+			return true;
+		}
+
+		return false;
+	}
+
+	bool GameMenu::is_on_rect(sf::RectangleShape obj)
+	{
+		if ((obj.getGlobalBounds().contains(
+			sf::Touch::getPosition(0, m_data->window).x,
+			sf::Touch::getPosition(0, m_data->window).y) ||
+
+			obj.getGlobalBounds().contains(
+				sf::Mouse::getPosition(m_data->window).x,
+				sf::Mouse::getPosition(m_data->window).y))
+			) {
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -17,17 +17,26 @@ namespace Bezhok {
 		GameMenu(game_data_ref data);
 		~GameMenu();
 
+		/* draw menu */
 		void draw();
-		void handle_input();
+
+		/* handle input */
+		void handle_input(sf::Keyboard::Key key);
+
+		/* return id of clicked level */
 		int choosen_level();
 	private:
 		game_data_ref m_data;
 		vector<sf::RectangleShape> m_levels;
 		MenuState m_state = MenuState::main;
 
-		sf::RectangleShape m_stats_b;
+		sf::RectangleShape m_records_b;
 		sf::Sprite m_play_b;
 		sf::Texture m_play_b_texture;
+
+		/* check mouse position */
+		bool is_on_sprite(sf::Sprite obj);
+		bool is_on_rect(sf::RectangleShape obj);
 	};
 }
 
